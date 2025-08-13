@@ -13,6 +13,14 @@
     <header class="container">
       <h1>MovieSearch</h1>
       <p class="muted">Powered by TMDB (client-side)</p>
+
+      <label for="categorySelect" class="muted small">Browse category:</label>
+      <select id="categorySelect">
+        <option value="popular">Most Popular</option>
+        <option value="top_rated">Top Rated</option>
+        <option value="now_playing">Now Playing</option>
+      </select>
+
       <form id="searchForm" class="search">
         <input
           id="searchInput"
@@ -25,6 +33,7 @@
       </form>
       <div id="status" class="status" hidden></div>
     </header>
+
 
     <main class="container">
       <div id="results" class="grid"></div>
