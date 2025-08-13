@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>MovieSearch (TMDB)</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="container">
+      <h1>MovieSearch</h1>
+      <p class="muted">Powered by TMDB (client-side)</p>
+      <form id="searchForm" class="search">
+        <input
+          id="searchInput"
+          type="text"
+          placeholder="Search movies (e.g., Inception)"
+          required
+          autocomplete="off"
+        />
+        <button type="submit">Search</button>
+      </form>
+      <div id="status" class="status" hidden></div>
+    </header>
+
+    <main class="container">
+      <div id="results" class="grid"></div>
+    </main>
+
+    <footer class="container muted small">
+      <p>
+        Hey Ya !
+      </p>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
