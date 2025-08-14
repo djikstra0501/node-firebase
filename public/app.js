@@ -10,6 +10,9 @@ const input = $("searchInput");
 const results = $("results");
 const statusBox = $("status");
 const categorySelect = $("categorySelect");
+const modal = $("movieModal");
+const modalBody = $("modalBody");
+const closeModal = document.querySelector(".close");
 
 function setStatus(text, show = true) {
   statusBox.textContent = text;
@@ -22,7 +25,7 @@ function movieCard(m) {
   const year = (m.release_date || "").slice(0, 4) || "—";
   const overview = (m.overview || "").trim();
   return `
-    <article class="card">
+    <article class="card" data-id="${m.id}">
       <div class="poster">
         ${
           poster
@@ -102,6 +105,92 @@ form.addEventListener("submit", (e) => {
 
 categorySelect.addEventListener("change", () => {
   fetchMoviesByCategory(categorySelect.value);
+});
+
+// Add this new function to show movie details
+async function showMovieDetails(movieId) {
+  setStatus("Loading movie details...");
+  modal.hidden = false;
+  
+  const url = `https://api.themoviedb.org/3/movie/${movieId}?api_key=${encodeURIComponent(TMDB_API_KEY)}&append_to_response=credits`;
+  
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`TMDB HTTP ${res.status}`);
+    const movie = await res.json();
+    
+    const poster = movie.poster_path ? `${IMG_BASE}${movie.poster_path}` : "";
+    const backdrop = movie.backdrop_path ? `https://image.tmdb.org/t/p/original${movie.backdrop_path}` : "";
+    const vote = (movie.vote_average ?? 0).toFixed(1);
+    const year = (movie.release_date || "").slice(0, 4) || "—";
+    const runtime = movie.runtime ? `${Math.floor(movie.runtime / 60)}h ${movie.runtime % 60}m` : "—";
+    
+    // Get director if available
+    let director = "—";
+    if (movie.credits && movie.credits.crew) {
+      const directorInfo = movie.credits.crew.find(person => person.job === "Director");
+      if (directorInfo) director = directorInfo.name;
+    }
+    
+    // Get top 5 cast members
+    let cast = "—";
+    if (movie.credits && movie.credits.cast && movie.credits.cast.length) {
+      cast = movie.credits.cast.slice(0, 5).map(person => person.name).join(", ");
+    }
+    
+    modalBody.innerHTML = `
+      <div class="movie-details" style="${backdrop ? `background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('${backdrop}'); background-size: cover; background-position: center; padding: 20px; border-radius: 8px;` : ''}">
+        <div class="poster">
+          ${poster ? `<img src="${poster}" alt="${movie.title || 'Poster'}" />` : '<div class="noimg">No Image</div>'}
+        </div>
+        <div class="info">
+          <h2>${movie.title || "Untitled"} <span class="year">(${year})</span></h2>
+          ${movie.tagline ? `<p class="tagline">"${movie.tagline}"</p>` : ''}
+          
+          <div class="meta">
+            <span>⭐ ${vote}</span>
+            <span>${runtime}</span>
+            ${movie.genres && movie.genres.length ? `<span>${movie.genres.map(g => g.name).join(', ')}</span>` : ''}
+          </div>
+          
+          <h3>Overview</h3>
+          <p>${movie.overview || "No overview available."}</p>
+          
+          <div class="additional-info">
+            ${director !== "—" ? `<p><strong>Director:</strong> ${director}</p>` : ''}
+            ${cast !== "—" ? `<p><strong>Cast:</strong> ${cast}</p>` : ''}
+            ${movie.production_companies && movie.production_companies.length ? `<p><strong>Production:</strong> ${movie.production_companies.map(c => c.name).join(', ')}</p>` : ''}
+          </div>
+          
+          ${movie.homepage ? `<p><a href="${movie.homepage}" target="_blank" rel="noopener">Official Website</a></p>` : ''}
+        </div>
+      </div>
+    `;
+    
+    setStatus("", false);
+  } catch (err) {
+    console.error(err);
+    modalBody.innerHTML = `<p>Failed to load movie details. Please try again.</p>`;
+    setStatus("Failed to load movie details", true);
+  }
+}
+
+closeModal.addEventListener("click", () => {
+  modal.hidden = true;
+});
+
+window.addEventListener("click", (e) => {
+  if (e.target === modal) {
+    modal.hidden = true;
+  }
+});
+
+results.addEventListener("click", (e) => {
+  const card = e.target.closest(".card");
+  if (card) {
+    const movieId = card.dataset.id;
+    if (movieId) showMovieDetails(movieId);
+  }
 });
 
 // Load default category on page load
