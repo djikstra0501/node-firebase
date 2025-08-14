@@ -110,7 +110,7 @@ categorySelect.addEventListener("change", () => {
 // Add this new function to show movie details
 async function showMovieDetails(movieId) {
   setStatus("Loading movie details...");
-  modal.hidden = false;
+  modal.style.display = "flex";
   
   const url = `https://api.themoviedb.org/3/movie/${movieId}?api_key=${encodeURIComponent(TMDB_API_KEY)}&append_to_response=credits`;
   
@@ -176,12 +176,12 @@ async function showMovieDetails(movieId) {
 }
 
 closeModal.addEventListener("click", () => {
-  modal.hidden = true;
+  modal.style.display = "none";
 });
 
 window.addEventListener("click", (e) => {
   if (e.target === modal) {
-    modal.hidden = true;
+    modal.style.display = "none";
   }
 });
 
@@ -192,6 +192,8 @@ results.addEventListener("click", (e) => {
     if (movieId) showMovieDetails(movieId);
   }
 });
+
+modal.style.display = "none";
 
 // Load default category on page load
 fetchMoviesByCategory("popular");
